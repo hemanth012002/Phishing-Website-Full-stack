@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Phishing URL Detector{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h2>Login</h2>
+        <p class="text-muted">Welcome back! Please login to your account.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-block">Login</button>
+    </form>
+
+    <div class="form-footer text-center mt-2">
+        <p class="text-muted">Don't have an account? <a href="{{ url_for('register') }}" class="text-primary">Register here</a></p>
+    </div>
+</div>
+
+<style>
+.form-container {
+    max-width: 400px;
+    margin: 4rem auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h2 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.text-primary {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.text-primary:hover {
+    text-decoration: underline;
+}
+
+.form-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+</style>
+{% endblock %} 

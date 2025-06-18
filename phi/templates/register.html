@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Phishing URL Detector{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h2>Create Account</h2>
+        <p class="text-muted">Join us to start protecting yourself from phishing attacks.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required 
+                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
+            <small class="text-muted">Password must be at least 8 characters long and include uppercase, lowercase, and numbers.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+            <div id="password-match" class="text-danger" style="display: none;">Passwords do not match</div>
+        </div>
+
+        <button type="submit" class="btn btn-block">Register</button>
+    </form>
+
+    <div class="form-footer text-center mt-2">
+        <p class="text-muted">Already have an account? <a href="{{ url_for('login') }}" class="text-primary">Login here</a></p>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    const password = $('#password');
+    const confirmPassword = $('#confirm_password');
+    const passwordMatch = $('#password-match');
+    const form = $('#registerForm');
+
+    function checkPasswordMatch() {
+        if (password.val() !== confirmPassword.val()) {
+            passwordMatch.show();
+            return false;
+        } else {
+            passwordMatch.hide();
+            return true;
+        }
+    }
+
+    confirmPassword.on('keyup', checkPasswordMatch);
+
+    form.on('submit', function(e) {
+        if (!checkPasswordMatch()) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
+
+<style>
+.form-container {
+    max-width: 400px;
+    margin: 4rem auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h2 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.text-primary {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.text-primary:hover {
+    text-decoration: underline;
+}
+
+.form-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+small {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
+#password-match {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,630 @@
+{% extends "base.html" %}
+
+{% block title %}URL Checker - Phishing URL Detector{% endblock %}
+
+{% block header_title %}URL Checker{% endblock %}
+
+{% block header_actions %}
+<div class="header-actions">
+    <button class="btn btn-secondary" id="clearHistory">
+        <i class="fas fa-trash-alt"></i>
+        Clear History
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="url-checker">
+    <form id="checkUrlForm" class="check-form">
+        <div class="input-group">
+            <input type="url" id="url" name="url" class="form-control" placeholder="Enter URL to check (e.g., example.com)" required>
+            <button type="submit" id="checkButton" class="btn">
+                <div class="spinner" style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+                <span class="button-text">Check URL</span>
+            </button>
+        </div>
+    </form>
+
+    <div id="result" class="result-container" style="display: none;">
+        <div class="result-header">
+            <div class="result-status"></div>
+            <div class="result-timestamp"></div>
+        </div>
+        <div class="result-details"></div>
+    </div>
+
+    <section class="history-section">
+        <div class="history-header">
+            <h2>Check History</h2>
+            <div class="history-filters">
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="form-control">
+                        <option value="all">All Results</option>
+                        <option value="Safe">Safe URLs</option>
+                        <option value="Phishing">Phishing URLs</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="dateFilter">Date Range</label>
+                    <select id="dateFilter" class="form-control">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="history-table">
+                <tbody>
+                    {% for check in history %}
+                    <tr class="history-row" 
+                        data-status="{{ check.result }}"
+                        data-date="{{ check.timestamp.strftime('%Y-%m-%d') }}">
+                        <td class="url-cell">
+                            <div class="url-content">
+                                <i class="fas fa-link"></i>
+                                <span class="url-text">{{ check.url }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="result-badge {{ 'result-safe' if check.result == 'Safe' else 'result-phishing' }}">
+                                {{ check.result }}
+                            </span>
+                        </td>
+                        <td class="date-cell">{{ check.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-icon" title="Check Again" onclick="checkUrlAgain('{{ check.url }}')">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                                <button class="btn btn-icon" title="Delete" onclick="deleteCheck('{{ check._id }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<style>
+.url-checker {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.check-form {
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(10px);
+}
+
+.form-control {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all var(--transition-speed);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.history-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.history-header h2 {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.history-filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    color: var(--text-light);
+    font-size: 0.875rem;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.history-table td {
+    padding: 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.history-table tr:last-child td {
+    border-bottom: none;
+}
+
+.history-table tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.url-cell {
+    max-width: 300px;
+}
+
+.url-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.url-content i {
+    color: var(--accent-color);
+    font-size: 1rem;
+}
+
+.url-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.date-cell {
+    color: var(--text-light) !important;
+    font-size: 0.9rem !important;
+}
+
+.result-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.result-safe {
+    background: rgba(76, 175, 80, 0.15);
+    color: #81c784;
+}
+
+.result-phishing {
+    background: rgba(207, 102, 121, 0.15);
+    color: #e57373;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-icon {
+    padding: 0.6rem;
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    color: var(--accent-color);
+}
+
+.result-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.result-timestamp {
+    color: var(--text-light);
+    font-size: 0.875rem;
+}
+
+.analysis-section {
+    margin-top: 1.5rem;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.analysis-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+}
+
+.analysis-card h4 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.analysis-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.analysis-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-light);
+    font-size: 0.875rem;
+}
+
+.analysis-list li:last-child {
+    margin-bottom: 0;
+}
+
+.analysis-list i {
+    margin-top: 0.25rem;
+}
+
+.trust-indicator {
+    color: #4caf50;
+}
+
+.suspicious-indicator {
+    color: #cf6679;
+}
+
+.neutral-indicator {
+    color: #ff9800;
+}
+
+@media (max-width: 768px) {
+    .url-checker {
+        padding: 1rem 0;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .history-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .history-filters {
+        flex-direction: column;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .history-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .url-cell {
+        max-width: 200px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    const form = $('#checkUrlForm');
+    const urlInput = $('#url');
+    const result = $('#result');
+    const checkButton = $('#checkButton');
+    const spinner = $('.spinner');
+    const buttonText = $('.button-text');
+    const resultStatus = $('.result-status');
+    const resultDetails = $('.result-details');
+    const resultTimestamp = $('.result-timestamp');
+    const statusFilter = $('#statusFilter');
+    const dateFilter = $('#dateFilter');
+    const historyRows = $('.history-row');
+    const historyEmpty = $('.history-empty');
+
+    // URL validation function
+    function isValidUrl(url) {
+        // Remove any whitespace
+        url = url.trim();
+        
+        // Basic URL validation pattern
+        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+        
+        // Check if URL matches the pattern
+        if (!urlPattern.test(url)) {
+            return false;
+        }
+        
+        // Additional validation for common TLDs
+        const validTLDs = ['.com', '.org', '.net', '.edu', '.gov', '.io', '.co', '.info', '.biz'];
+        const hasValidTLD = validTLDs.some(tld => url.toLowerCase().includes(tld));
+        
+        return hasValidTLD;
+    }
+
+    // Form submission
+    form.on('submit', function(e) {
+        e.preventDefault();
+        
+        const url = urlInput.val().trim();
+        if (!url) {
+            alert('Please enter a URL to check');
+            return;
+        }
+
+        if (!isValidUrl(url)) {
+            alert('Please enter a valid URL (e.g., example.com, www.example.com, https://example.com)');
+            return;
+        }
+
+        // Show loading state
+        checkButton.prop('disabled', true);
+        spinner.show();
+        buttonText.text('Checking...');
+        result.hide();
+
+        // Send request to check URL
+        $.ajax({
+            url: '/check-url',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ url: url }),
+            success: function(response) {
+                // Update result display
+                displayResult(response);
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON?.error || 'An error occurred while checking the URL';
+                resultStatus.html(`
+                    <div class="result-badge result-error">
+                        Error
+                    </div>
+                `);
+                resultDetails.html(`
+                    <div class="details-content">
+                        <p>${error}</p>
+                    </div>
+                `);
+                result.show();
+            },
+            complete: function() {
+                // Reset button state
+                checkButton.prop('disabled', false);
+                spinner.hide();
+                buttonText.text('Check URL');
+            }
+        });
+    });
+
+    // Real-time URL validation
+    urlInput.on('input', function() {
+        const url = $(this).val().trim();
+        if (url && !isValidUrl(url)) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    // Filter functionality
+    function applyFilters() {
+        const status = statusFilter.val();
+        const date = dateFilter.val();
+        let visibleRows = 0;
+
+        historyRows.each(function() {
+            const row = $(this);
+            const rowStatus = row.data('status');
+            const rowDate = row.data('date');
+            const today = new Date().toISOString().split('T')[0];
+            
+            let showByStatus = status === 'all' || rowStatus === status;
+            let showByDate = true;
+
+            if (date !== 'all') {
+                const rowDateObj = new Date(rowDate);
+                const todayObj = new Date(today);
+                
+                switch(date) {
+                    case 'today':
+                        showByDate = rowDate === today;
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(todayObj.setDate(todayObj.getDate() - 7));
+                        showByDate = rowDateObj >= weekAgo;
+                        break;
+                    case 'month':
+                        const monthAgo = new Date(todayObj.setMonth(todayObj.getMonth() - 1));
+                        showByDate = rowDateObj >= monthAgo;
+                        break;
+                }
+            }
+
+            if (showByStatus && showByDate) {
+                row.show();
+                visibleRows++;
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show/hide empty state
+        if (visibleRows === 0) {
+            historyEmpty.show();
+        } else {
+            historyEmpty.hide();
+        }
+    }
+
+    statusFilter.on('change', applyFilters);
+    dateFilter.on('change', applyFilters);
+
+    // Clear history
+    $('#clearHistory').on('click', function() {
+        if (confirm('Are you sure you want to clear your entire check history?')) {
+            // Add API endpoint for clearing history
+            $.ajax({
+                url: '/clear-history',
+                method: 'POST',
+                success: function() {
+                    window.location.reload();
+                }
+            });
+        }
+    });
+
+    // Check URL again
+    window.checkUrlAgain = function(url) {
+        urlInput.val(url);
+        form.submit();
+    };
+
+    // Delete single check
+    window.deleteCheck = function(checkId) {
+        if (confirm('Are you sure you want to delete this check?')) {
+            // Add API endpoint for deleting single check
+            $.ajax({
+                url: `/delete-check/${checkId}`,
+                method: 'POST',
+                success: function() {
+                    window.location.reload();
+                }
+            });
+        }
+    };
+
+    // Initial filter application
+    applyFilters();
+
+    // Update the result display to remove percentage
+    function displayResult(response) {
+        const resultClass = response.result === 'Safe' ? 'result-safe' : 'result-phishing';
+        
+        resultStatus.html(`
+            <div class="result-badge ${resultClass}">
+                ${response.result}
+            </div>
+        `);
+        
+        // Display detailed analysis without percentage
+        const analysis = response.analysis;
+        resultDetails.html(`
+            <div class="analysis-section">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Trust Indicators</h4>
+                        <ul class="analysis-list">
+                            ${analysis.trust_indicators.map(indicator => 
+                                `<li><i class="fas fa-check-circle trust-indicator"></i>${indicator}</li>`
+                            ).join('') || '<li>No trust indicators found</li>'}
+                        </ul>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Suspicious Patterns</h4>
+                        <ul class="analysis-list">
+                            ${analysis.suspicious_patterns.map(pattern => 
+                                `<li><i class="fas fa-exclamation-triangle suspicious-indicator"></i>${pattern}</li>`
+                            ).join('') || '<li>No suspicious patterns detected</li>'}
+                        </ul>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Recommendations</h4>
+                        <ul class="analysis-list">
+                            ${analysis.recommendations.map(rec => 
+                                `<li><i class="fas fa-info-circle neutral-indicator"></i>${rec}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        resultTimestamp.text(new Date().toLocaleString());
+        result.show();
+    }
+});
+</script>
+{% endblock %} 

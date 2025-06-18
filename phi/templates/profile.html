@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Phishing URL Detector{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ user.name[0].upper() }}
+            </div>
+            <h2>{{ user.name }}</h2>
+            <p class="text-muted">{{ user.email }}</p>
+        </div>
+
+        <div class="profile-info">
+            <div class="info-group">
+                <label>Member Since</label>
+                <p>{{ user.created_at.strftime('%B %d, %Y') }}</p>
+            </div>
+
+            <div class="info-group">
+                <label>Account Status</label>
+                <p class="text-success">Active</p>
+            </div>
+
+            <div class="info-group">
+                <label>Total URL Checks</label>
+                <p>{{ history|length }}</p>
+            </div>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-card">
+                <span class="stat-value">{{ history|selectattr('result', 'equalto', 'Safe')|list|length }}</span>
+                <span class="stat-label">Safe URLs</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ history|selectattr('result', 'equalto', 'Phishing')|list|length }}</span>
+                <span class="stat-label">Phishing URLs</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    background: #3498db;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 1rem;
+}
+
+.profile-info {
+    margin-bottom: 2rem;
+}
+
+.info-group {
+    margin-bottom: 1.5rem;
+}
+
+.info-group label {
+    display: block;
+    color: #718096;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-group p {
+    font-size: 1.125rem;
+    color: #2d3748;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.stat-card {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %} 
