@@ -9,7 +9,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.16
       - key: MONGODB_URI
-        value: mongodb://localhost:27017/  # TODO: Replace with MongoDB Atlas URI
+        value: mongodb+srv://Saihemanth:YOUR_REAL_PASSWORD@cluster0.qnt0irh.mongodb.net/phishing_detector?retryWrites=true&w=majority&appName=Cluster0
       - key: SECRET_KEY
         generateValue: true
       - key: FLASK_ENV
