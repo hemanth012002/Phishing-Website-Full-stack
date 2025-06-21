@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from phishing_utils import extract_url_features
 import joblib
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables
 
 # Update feature names to match the actual dataset columns (excluding 'url' and 'status')
 FEATURE_NAMES = [
@@ -46,10 +49,10 @@ FEATURE_NAMES = [
 ]
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # For session management
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))  # For session management
 
 # MongoDB setup
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient(os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/'))
 db = client['phishing_detector']
 users = db['users']
 url_history = db['url_history']
@@ -1081,4 +1084,5 @@ def view_data():
         '''
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), debug=False) 
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=False) 
