@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Phishing URL Detector - Protect Yourself from Cyber Threats{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="home" class="hero">
+    <div class="hero-content">
+        <h1>Protect Yourself from Phishing Attacks</h1>
+        <p class="subtitle">Advanced AI-powered protection against malicious URLs and cyber threats</p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Get Started</a>
+            <a href="#features" class="btn btn-secondary">Learn More</a>
+        </div>
+    </div>
+    <div class="hero-overlay"></div>
+</section>
+
+<!-- Main Content Section -->
+<section class="main-sections">
+    <!-- Features Section -->
+    <div id="features" class="features">
+        <h2>Why Choose PhishGuard?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Detection</h3>
+                <p>Our advanced machine learning algorithms analyze URLs in real-time to identify potential threats before they can harm you.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Real-Time Analysis</h3>
+                <p>Instant URL scanning and threat detection with minimal latency, ensuring your safety without compromising speed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>24/7 Protection</h3>
+                <p>Round-the-clock monitoring and protection against evolving phishing threats and cyber attacks.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div id="contact" class="contact">
+        <h2>Get in Touch</h2>
+        <div class="contact-container">
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <a href="mailto:nshemanth012002@gmail.com">nshemanth012002@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    <a href="tel:+917382969258">+91 7382969258</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    mobileMenuBtn.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        mobileMenuBtn.classList.toggle('active');
+    });
+
+    document.getElementById('urlForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const url = document.getElementById('url').value;
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+        const loadingDiv = document.getElementById('loading');
+        
+        // Show loading
+        loadingDiv.style.display = 'flex';
+        resultDiv.style.display = 'none';
+        
+        try {
+            const response = await fetch('/check-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Display result
+                resultDiv.innerHTML = `
+                    <div class="result-container">
+                        <h3>Analysis Result</h3>
+                        <div class="result-box ${data.result}">
+                            <span class="result-text" style="color: ${data.color}">${data.result.toUpperCase()}</span>
+                        </div>
+                        <div class="analysis-details">
+                            <h4>Domain Trust</h4>
+                            <p>${data.analysis.domain_trust}</p>
+                            
+                            <h4>Suspicious Patterns</h4>
+                            <ul>
+                                ${data.analysis.suspicious_patterns.map(pattern => `<li>${pattern}</li>`).join('')}
+                            </ul>
+                            
+                            <h4>Recommendations</h4>
+                            <ul>
+                                ${data.analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultContent.innerHTML = `<div class="error-message">${data.error}</div>`;
+                resultDiv.style.display = 'block';
+            }
+        } catch (error) {
+            resultContent.innerHTML = '<div class="error-message">An error occurred. Please try again.</div>';
+            resultDiv.style.display = 'block';
+        } finally {
+            loadingDiv.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %} 

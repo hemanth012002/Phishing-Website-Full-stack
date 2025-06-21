@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Check URL - Phishing URL Detector{% endblock %}
+
+{% block header_title %}Check URL{% endblock %}
+
+{% block content %}
+<div class="url-checker">
+    <form id="checkUrlForm" class="check-form">
+        <div class="input-group">
+            <input type="text" id="url" name="url" class="form-control" placeholder="Enter URL to check (e.g., example.com)" required>
+            <button type="submit" id="checkButton" class="btn">
+                <div class="spinner" style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+                <span class="button-text">Check URL</span>
+            </button>
+        </div>
+    </form>
+
+    <div id="result" class="result-container" style="display: none;">
+        <div class="result-content">
+            <div class="result-header">
+                <h3>Result</h3>
+                <span class="result-badge" id="resultBadge"></span>
+            </div>
+            <div class="result-details">
+                <h4>Analysis</h4>
+                <ul id="analysisList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="error" class="error-container" style="display: none;">
+        <div class="error-content">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorMessage"></span>
+        </div>
+    </div>
+</div>
+
+<style>
+.url-checker {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.check-form {
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(10px);
+}
+
+.form-control {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all var(--transition-speed);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--accent-color);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn:hover {
+    background: var(--accent-color-hover);
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.spinner {
+    display: none;
+}
+
+.result-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(10px);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.result-badge {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+}
+
+.result-badge.safe {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.result-badge.suspicious {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.result-badge.phishing {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.result-details {
+    margin-top: 1rem;
+}
+
+.result-details h4 {
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+}
+
+.result-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.result-details li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+}
+
+.result-details li:last-child {
+    border-bottom: none;
+}
+
+.error-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.2);
+    border-radius: var(--border-radius);
+    color: #f44336;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-container i {
+    font-size: 1.25rem;
+}
+</style>
+
+<script>
+document.getElementById('checkUrlForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const url = document.getElementById('url').value;
+    const resultDiv = document.getElementById('result');
+    const resultBadge = document.getElementById('resultBadge');
+    const analysisList = document.getElementById('analysisList');
+    const errorDiv = document.getElementById('error');
+    const errorMessage = document.getElementById('errorMessage');
+    const checkButton = document.getElementById('checkButton');
+    const spinner = checkButton.querySelector('.spinner');
+    const buttonText = checkButton.querySelector('.button-text');
+    
+    // Reset UI
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    
+    // Show loading state
+    spinner.style.display = 'inline-block';
+    buttonText.style.display = 'none';
+    checkButton.disabled = true;
+    
+    try {
+        const response = await fetch('/check-url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Update result badge
+            resultBadge.textContent = data.result;
+            resultBadge.className = 'result-badge ' + data.result.toLowerCase();
+            
+            // Clear and update analysis list
+            analysisList.innerHTML = '';
+            
+            // Add trust indicators
+            if (data.analysis.trust_indicators && data.analysis.trust_indicators.length > 0) {
+                const trustItem = document.createElement('li');
+                trustItem.innerHTML = '<strong>Trust Indicators:</strong><br>' + data.analysis.trust_indicators.join('<br>');
+                analysisList.appendChild(trustItem);
+            }
+            
+            // Add suspicious patterns
+            if (data.analysis.suspicious_patterns && data.analysis.suspicious_patterns.length > 0) {
+                const suspiciousItem = document.createElement('li');
+                suspiciousItem.innerHTML = '<strong>Suspicious Patterns:</strong><br>' + data.analysis.suspicious_patterns.join('<br>');
+                analysisList.appendChild(suspiciousItem);
+            }
+            
+            // Add recommendations
+            if (data.analysis.recommendations && data.analysis.recommendations.length > 0) {
+                const recommendationsItem = document.createElement('li');
+                recommendationsItem.innerHTML = '<strong>Recommendations:</strong><br>' + data.analysis.recommendations.join('<br>');
+                analysisList.appendChild(recommendationsItem);
+            }
+            
+            // Show result
+            resultDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        } else {
+            // Show error
+            errorMessage.textContent = data.error || 'An error occurred while checking the URL';
+            errorDiv.style.display = 'flex';
+            resultDiv.style.display = 'none';
+        }
+    } catch (error) {
+        // Show error
+        errorMessage.textContent = 'Failed to connect to the server. Please try again later.';
+        errorDiv.style.display = 'flex';
+        resultDiv.style.display = 'none';
+    } finally {
+        // Reset button state
+        spinner.style.display = 'none';
+        buttonText.style.display = 'inline';
+        checkButton.disabled = false;
+    }
+});
+</script>
+{% endblock %} 

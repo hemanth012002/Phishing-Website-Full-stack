@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Phishing URL Detector{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h2>Login</h2>
+        <p class="text-muted">Welcome back! Please login to your account.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-block">Login</button>
+    </form>
+
+    <div class="form-footer">
+        <p class="text-muted">Don't have an account? <a href="{{ url_for('register') }}" class="text-primary">Register here</a></p>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Phishing URL Detector{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-section">
+        <h2>Profile</h2>
+        <div class="profile-info">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+        </div>
+        
+        <div class="profile-stats">
+            <div class="stat-box">
+                <h4>Total Checks</h4>
+                <p>{{ history|length }}</p>
+            </div>
+            <div class="stat-box">
+                <h4>Safe URLs</h4>
+                <p>{{ safe_count }}</p>
+            </div>
+            <div class="stat-box">
+                <h4>Suspicious URLs</h4>
+                <p>{{ suspicious_count }}</p>
+            </div>
+            <div class="stat-box">
+                <h4>Phishing URLs</h4>
+                <p>{{ phishing_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h2>URL Check History</h2>
+        <div class="history-list">
+            {% for check in history %}
+            <div class="history-item">
+                <div class="history-header">
+                    <span class="url">{{ check.url }}</span>
+                    <span class="result" style="color: {% if check.result == 'safe' %}green{% else %}red{% endif %}">
+                        {{ check.result|upper }}
+                    </span>
+                </div>
+                <div class="history-details">
+                    <p><strong>Domain Trust:</strong> {{ check.analysis.domain_trust }}</p>
+                    {% if check.analysis.suspicious_patterns %}
+                    <p><strong>Suspicious Patterns:</strong></p>
+                    <ul>
+                        {% for pattern in check.analysis.suspicious_patterns %}
+                        <li>{{ pattern }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <p><strong>Checked on:</strong> {{ check.timestamp.strftime('%Y-%m-%d') }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
