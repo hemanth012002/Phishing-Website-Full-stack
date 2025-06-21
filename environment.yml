@@ -1,0 +1,12 @@
+name: phi
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - flask=2.3.3
+  - scikit-learn=1.2.2
+  - pandas=1.5.3
+  - numpy=1.24.3
+  - gunicorn=21.2.0
+  - pip 

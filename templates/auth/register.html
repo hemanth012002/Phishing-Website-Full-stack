@@ -9,10 +9,10 @@
     <div class="auth-card">
         <div class="auth-header">
             <h2>Create Account</h2>
-            <p>Join us to protect yourself from phishing attacks</p>
+            <p>Join us in protecting against phishing attacks</p>
         </div>
 
-        <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+        <form method="POST" action="{{ url_for('register') }}" class="auth-form">
             {{ form.hidden_tag() }}
             
             <div class="form-group">
@@ -49,7 +49,7 @@
                 <label for="password">Password</label>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    {{ form.password(class="form-control", placeholder="Create a password") }}
+                    {{ form.password(class="form-control", placeholder="Enter your password") }}
                 </div>
                 {% if form.password.errors %}
                     <div class="error-message">
@@ -82,7 +82,7 @@
         </form>
 
         <div class="auth-footer">
-            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+            <p>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
         </div>
     </div>
 </div>

@@ -12,7 +12,7 @@
             <p>Sign in to continue protecting yourself from phishing attacks</p>
         </div>
 
-        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
             {{ form.hidden_tag() }}
             
             <div class="form-group">
