@@ -165,7 +165,7 @@ def load_or_train_model():
         model_path = os.path.join(os.path.dirname(__file__), 'model.pth')
         scaler_path = os.path.join(os.path.dirname(__file__), 'scaler.pkl')
         
-       if os.path.exists(model_path) and os.path.exists(scaler_path):
+        if os.path.exists(model_path) and os.path.exists(scaler_path):
             print("Loading pre-trained model and scaler...")
             model = PhishingDetector(len(FEATURE_NAMES))
             # Load the model with mapping to CPU to ensure compatibility
