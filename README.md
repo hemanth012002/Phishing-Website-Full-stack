@@ -20,6 +20,7 @@ A full-stack web application that uses machine learning to detect phishing URLs.
 
 ## Project Structure
 
+```
 phi/
 ├── app.py
 ├── build.sh
@@ -43,6 +44,7 @@ phi/
 │   │   └── security-illustration.svg
 │   └── js/
 ├── templates/
+│   ├── auth/
 │   ├── base.html
 │   ├── check.html
 │   ├── history.html
@@ -50,6 +52,7 @@ phi/
 │   ├── login.html
 │   ├── profile.html
 │   └── register.html
+```
 
 ## Local Setup Instructions
 
