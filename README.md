@@ -20,25 +20,36 @@ A full-stack web application that uses machine learning to detect phishing URLs.
 
 ## Project Structure
 
-```
-Phishing-Checker/
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── script.js
-├── templates/
-│   ├── index.html
-│   ├── login.html
-│   ├── register.html
-│   ├── profile.html
-│   └── history.html
+phi/
 ├── app.py
+├── build.sh
+├── dataset_phishing.csv
+├── deployment_check.py
+├── environment.yml
+├── gunicorn.conf.py
 ├── model.pth
 ├── phishing_utils.py
+├── README.md
+├── render.yaml
 ├── requirements.txt
-└── README.md
-```
+├── scaler.pkl
+├── static/
+│   ├── css/
+│   │   ├── auth.css
+│   │   ├── landing.css
+│   │   ├── profile.css
+│   │   └── style.css
+│   ├── images/
+│   │   └── security-illustration.svg
+│   └── js/
+├── templates/
+│   ├── base.html
+│   ├── check.html
+│   ├── history.html
+│   ├── index.html
+│   ├── login.html
+│   ├── profile.html
+│   └── register.html
 
 ## Local Setup Instructions
 
